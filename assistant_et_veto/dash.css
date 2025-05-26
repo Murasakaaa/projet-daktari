@@ -1,0 +1,42 @@
+body {
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+header > button {
+    max-height: 2rem;
+}
+
+.container {
+    min-height: 10rem;
+    display: flex;
+    justify-content: start;
+}
+
+.selection-box>form {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+}
+
+select, input { 
+    display: block; 
+    margin-bottom: 10px; 
+    min-width: 200px; 
+}
+
+.container {
+    display: flex;
+    gap: 20px;
+}
+.selection-box {
+    padding: 20px;
+    border-radius: 5px;
+}

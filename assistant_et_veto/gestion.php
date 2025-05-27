@@ -3,7 +3,7 @@ session_start();
 
 // Vérification des droits d'accès
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'veterinaire') {
-    header("Location: ../connexion/login.php");
+    header("Location: ../index.php");
     exit;
 }
 

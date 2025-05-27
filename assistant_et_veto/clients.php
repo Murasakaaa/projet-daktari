@@ -3,7 +3,7 @@ session_start();
 
 // si on est pas passé par le form de la page dashboard on ne peu pas rentrer ici
 if (!isset($_SESSION['role']) || !isset($_SESSION['client_id'])) {
-    header("Location: ../connexion/login.php");
+    header("Location: ../index.php");
     exit;
 }
 

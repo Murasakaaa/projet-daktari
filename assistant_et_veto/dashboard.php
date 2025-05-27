@@ -3,7 +3,7 @@ session_start();
 
 // Empêche l'accès sans connexion
 if (!isset($_SESSION['role'])) {
-    header("Location: ../connexion/login.php");
+    header("Location: ../index.php");
     exit;
 }
 

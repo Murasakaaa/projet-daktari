@@ -7,7 +7,7 @@ if (isset($_SESSION['u_id'])) {
     $u_id = $_SESSION['u_id'];
     $role = $_SESSION['role'];
 } else {
-    header("Location: ../connexion/login.php");
+    header("Location: ../index.php");
     exit;
 }
 ?>

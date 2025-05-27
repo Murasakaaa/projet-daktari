@@ -3,7 +3,7 @@ session_start();
 
 // empeche l'acces a la page si on est pas passer par le formulaire dans la page précedente
 if (!isset($_SESSION['role']) || !isset($_SESSION['id_animal'])) {
-    header("Location: ../connexion/login.php");
+    header("Location: ../index.php");
     exit;
 }
 

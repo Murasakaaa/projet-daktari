@@ -20,12 +20,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $verify = $cnx->prepare("SELECT * FROM MANIPULATION WHERE id_manip = :id");
             $verify->bindParam(":id", $_POST['id_manip']);
             $verify->execute();
-            $v = $verify->fetch(PDO::FETCH_ASSOC);
 
-            if (count($v)>0){
-                throw 'la manip existe déjà';
+            if ($verify->rowCount()>0){
+                throw new Exception("la manip existe déjà");
             }
-
 
             $stmt = $cnx->prepare("INSERT INTO MANIPULATION (id_manip, duree_en_min) VALUES (:id_manip, :duree)");
             $stmt->bindParam(':id_manip', $_POST['id_manip']);
@@ -60,11 +58,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         $cnx->commit();
-        $message = "Opération effectuée avec succès";
-    } catch (PDOException $e) {
+        $_SESSION['message'] = "Opération effectuée avec succès";
+
+    } catch (Exception $e) {
         $cnx->rollBack();
-        $erreur = "Erreur : " . $e->getMessage();
+        $_SESSION['error'] = "Erreur : " . $e->getMessage();
     }
+    //permet d'actualiser la page apres l'insertion
+    header("Location: ".$_SERVER['REQUEST_URI']);
+    exit;
 }
 ?>
 
@@ -78,14 +80,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <body>
     <h1>Gestion du cabinet</h1>
     
-    <?php if (isset($message)): ?>
-        <p class="message"><?= $message ?></p>
-    <?php endif; ?>
+    <?php if (isset($_SESSION['message'])): ?>
+        <p class="message"><?= $_SESSION['message'] ?></p>
+    <?php 
+    unset($_SESSION['message']);
+    endif; 
+    ?>
     
-    <?php if (isset($erreur)): ?>
-        <p class="error"><?= $erreur ?></p>
-    <?php endif; ?>
-
+    <?php if (isset($_SESSION['error'])): ?>
+        <p class="error"><?= $_SESSION['error'] ?></p>
+    <?php 
+    unset($_SESSION['error']);
+    endif; 
+    ?>
     
     <div class="box">
         <h2>Ajouter une manipulation</h2>
@@ -95,7 +102,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <button type="submit" name="ajout_manip">Ajouter</button>
         </form>
     </div>
+    <div class="box">
+        <?php 
+        $requete_manip = $cnx->prepare("SELECT * FROM MANIPULATION");
+        $requete_manip->execute();
+        $manips = $requete_manip->fetchAll(PDO::FETCH_ASSOC);
+        echo '<table>';
+        echo '<thead>
+                <tr>
+                    <th>Id Manipulation</th>
+                    <th>durée</th>
+                </tr>
+            </thead>
+            <tbody>';
+    foreach($manips as $manip):
+    ?>
+    <tr>
+        <td><?= $manip['id_manip'] ?></td>
+        <td><?= $manip['duree_en_min'] ?>min</td>
+    </tr>
+    <?php 
+    endforeach; 
+    echo '</tbody>';
+    echo '</table>';
+    ?>
+    </div>
 
+    </div>
     <div class="box">
         <h2>Ajouter un traitement</h2>
         <form method="post">
@@ -103,6 +136,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <label>Dilution: <input type="text" name="dilution"></label>
             <button type="submit" name="ajout_traitement">Ajouter</button>
         </form>
+    </div>
+
+    <div class="box">
+        <?php 
+        $requete_tratiement = $cnx->prepare("SELECT * FROM TRAITEMENT");
+        $requete_tratiement->execute();
+        $traitements = $requete_tratiement->fetchAll(PDO::FETCH_ASSOC);
+        echo '<table>';
+        echo '<thead>
+                <tr>
+                    <th>Produit</th>
+                    <th>Dilution</th>
+                </tr>
+            </thead>
+            <tbody>';
+    foreach($traitements as $t):
+    ?>
+    <tr>
+        <td><?= $t['produit'] ?></td>
+        <td>
+            <?php
+                if(!empty($t['dilution'])) {
+                    echo $t['dilution'];
+                } else {
+                    echo 'X';
+                } 
+            ?>
+        </td>
+    </tr>
+    <?php 
+    endforeach; 
+    echo '</tbody>';
+    echo '</table>';
+    ?>
     </div>
 
     <div class="box">
@@ -124,6 +191,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 
     <div class="box">
+        <?php 
+        $requete_tarif = $cnx->prepare("SELECT * FROM TARIF");
+        $requete_tarif->execute();
+        $tarifs = $requete_tarif->fetchAll(PDO::FETCH_ASSOC);
+        echo '<table class="tarif">';
+        echo '<thead>
+                <tr>
+                    <th>Type</th>
+                    <th>Lieu</th>
+                    <th>date début</th>
+                    <th>date fin</th>
+                    <th>Tarif</th>
+                </tr>
+            </thead>
+            <tbody>';
+    foreach($tarifs as $tarif):
+    ?>
+    <tr>
+        <td><?= $tarif['type_consultation'] ?></td>
+        <td><?= $tarif['lieu'] ?></td>
+        <td><?= date('d-m-Y' , strtotime($tarif['date_debut'])) ?></td>
+        <td>
+            <?php
+                if(!empty($tarif['date_fin'])) {
+                    echo date('d-m-Y' , strtotime($tarif['date_fin']));
+                } else {
+                    echo 'X';
+                } 
+            ?>
+        </td>
+        <td><?= $tarif['tarif'] ?>€</td>
+    </tr>
+    <?php 
+    endforeach; 
+    echo '</tbody>';
+    echo '</table>';
+    ?>
+    </div>
+
+    <div class="box">
         <h2>Ajouter un tarif spécial</h2>
         <form method="post">
             <label>Tarif spécial (en €): <input type="number" step="0.01" name="tarif_special" required></label>
@@ -131,5 +238,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <button type="submit" name="ajout_tarif_special">Ajouter</button>
         </form>
     </div>
+    <?php 
+        $requete_tarif = $cnx->prepare("SELECT * FROM TARIF_SPECIAL");
+        $requete_tarif->execute();
+        $tarifs_spe = $requete_tarif->fetchAll(PDO::FETCH_ASSOC);
+        echo '<table class="tarif">';
+        echo '<thead>
+                <tr>
+                    <th>Tarif</th>
+                    <th>Motif</th>
+                </tr>
+            </thead>
+            <tbody>';
+    foreach($tarifs_spe as $tarif):
+    ?>
+    <tr>
+        <td><?= $tarif['tarif_special'] ?></td>
+        <td><?= $tarif['motif'] ?></td>
+    </tr>
+    <?php 
+    endforeach; 
+    echo '</tbody>';
+    echo '</table>';
+    ?>
 </body>
 </html>

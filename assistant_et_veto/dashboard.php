@@ -10,6 +10,13 @@ if (!isset($_SESSION['role'])) {
 include("../connexion.inc.php");
 $role = $_SESSION['role'];
 
+// fait en sorte que le code soit executer que si on submit le formulaire du logout
+    if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['logout'])) {
+        session_destroy();
+        header("Location: ../index.php");
+        exit;
+    }
+
 // on verif que l'animal existe bien pour ce proprietaire
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (isset($_POST['id_proprio']) && isset($_POST['nom_animal'])) {
@@ -64,6 +71,7 @@ if (isset($_POST['client_id'])) {
         <?php if($role === 'veterinaire') {
             echo "<a href='./gestion.php'><button>Gestion</button></a>";
         } ?>
+        <form action="" method="post"><input type="submit" name="logout" value='déconnexion'></form>
     </header>
     <main>
         <div class="container">

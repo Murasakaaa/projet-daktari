@@ -6,6 +6,14 @@ if (isset($_SESSION['u_id'])) {
     include("../connexion.inc.php");
     $u_id = $_SESSION['u_id'];
     $role = $_SESSION['role'];
+
+    // fait en sorte que le code soit executer que si on submit un formulaire
+    if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+        session_destroy();
+        header("Location: ../index.php");
+        exit;
+    }
+
 } else {
     header("Location: ../index.php");
     exit;
@@ -21,7 +29,10 @@ if (isset($_SESSION['u_id'])) {
     <link rel="stylesheet" href="./animaux.css">
 </head>
 <body>
-    <h1><u>Espace client</u></h1>
+    <header>
+        <h1><u>Espace client</u></h1> <form action="" method="post"><input type="submit" name="logout" value='déconnexion'></form>
+    </header>
+    
     <?php
     $qry = $cnx->prepare("SELECT nom, prenom FROM proprietaire WHERE id_proprio = :id");
     $qry->bindParam(":id", $u_id);

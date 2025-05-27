@@ -33,6 +33,7 @@ $animal = $req_animal->fetch(PDO::FETCH_ASSOC);
 </head>
 <body>
     <a href="./dashboard.php"><button>Retour</button></a>
+    <a href="./consultation.php"><button>Créer une consultation</button></a>
 
     <div class="info-section">
         <h1>Fiche de <?= $animal['nom'] ?></h1>

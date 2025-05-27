@@ -9,7 +9,7 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'veterinaire') {
 
 include("../connexion.inc.php");
 
-// Traitement des formulaires
+// fait en sorte que le code soit executer que si on submit un formulaire
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         $cnx->beginTransaction();
@@ -17,44 +17,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // ajout manipulation
         if (isset($_POST['ajout_manip'])) {
 
+            // verif si la manip n'existe pas déjà
             $verify = $cnx->prepare("SELECT * FROM MANIPULATION WHERE id_manip = :id");
             $verify->bindParam(":id", $_POST['id_manip']);
             $verify->execute();
-
+            
+            // si une manip a la meme clé primaire on renvoi une erreur
             if ($verify->rowCount()>0){
                 throw new Exception("la manip existe déjà");
             }
 
-            $stmt = $cnx->prepare("INSERT INTO MANIPULATION (id_manip, duree_en_min) VALUES (:id_manip, :duree)");
-            $stmt->bindParam(':id_manip', $_POST['id_manip']);
-            $stmt->bindParam(':duree', $_POST['duree_en_min']);
-            $stmt->execute();
+            $qry = $cnx->prepare("INSERT INTO MANIPULATION (id_manip, duree_en_min) VALUES (:id_manip, :duree)");
+            $qry->bindParam(':id_manip', $_POST['id_manip']);
+            $qry->bindParam(':duree', $_POST['duree_en_min']);
+            $qry->execute();
         }
 
         // ajout traitement
         if (isset($_POST['ajout_traitement'])) {
-            $stmt = $cnx->prepare("INSERT INTO TRAITEMENT (produit, dilution) VALUES (:produit, :dilution)");
-            $stmt->bindParam(':produit', $_POST['produit']);
-            $stmt->bindParam(':dilution', $_POST['dilution']);
-            $stmt->execute();
+            $qry = $cnx->prepare("INSERT INTO TRAITEMENT (produit, dilution) VALUES (:produit, :dilution)");
+            $qry->bindParam(':produit', $_POST['produit']);
+            $qry->bindParam(':dilution', $_POST['dilution']);
+            $qry->execute();
         }
 
         // ajout tarif
         if (isset($_POST['ajout_tarif'])) {
-            $stmt = $cnx->prepare("INSERT INTO TARIF (type_consultation, lieu, tarif, date_debut) VALUES (:type, :lieu, :tarif, :date_debut)");
-            $stmt->bindParam(':type', $_POST['type_consultation']);
-            $stmt->bindParam(':lieu', $_POST['lieu']);
-            $stmt->bindParam(':tarif', $_POST['tarif']);
-            $stmt->bindParam(':date_debut', $_POST['date_debut']);
-            $stmt->execute();
+            $qry = $cnx->prepare("INSERT INTO TARIF (type_consultation, lieu, tarif, date_debut) VALUES (:type, :lieu, :tarif, :date_debut)");
+            $qry->bindParam(':type', $_POST['type_consultation']);
+            $qry->bindParam(':lieu', $_POST['lieu']);
+            $qry->bindParam(':tarif', $_POST['tarif']);
+            $qry->bindParam(':date_debut', $_POST['date_debut']);
+            $qry->execute();
         }
 
         // ajout tarif spécial
         if (isset($_POST['ajout_tarif_special'])) {
-            $stmt = $cnx->prepare("INSERT INTO TARIF_SPECIAL (tarif_special, motif) VALUES (:tarif_special, :motif)");
-            $stmt->bindParam(':tarif_special', $_POST['tarif_special']);
-            $stmt->bindParam(':motif', $_POST['motif']);
-            $stmt->execute();
+            $qry = $cnx->prepare("INSERT INTO TARIF_SPECIAL (tarif_special, motif) VALUES (:tarif_special, :motif)");
+            $qry->bindParam(':tarif_special', $_POST['tarif_special']);
+            $qry->bindParam(':motif', $_POST['motif']);
+            $qry->execute();
         }
 
         $cnx->commit();

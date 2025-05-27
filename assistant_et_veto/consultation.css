@@ -1,0 +1,9 @@
+body { font-family: Arial, sans-serif; margin: 20px; }
+.container { max-width: 1000px; margin: 0 auto; }
+.form-group { margin-bottom: 15px; }
+label { display: block; margin-bottom: 5px; font-weight: bold; }
+input, select, textarea { width: 100%; padding: 8px; box-sizing: border-box; }
+.success { color: green; }
+.error { color: red; }
+.btn { padding: 8px 15px; background-color: #4CAF50; color: white; border: none; cursor: pointer; }
+.btn:hover { background-color: #45a049; }

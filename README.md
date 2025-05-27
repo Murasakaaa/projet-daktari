@@ -1,2 +1,2 @@
 # projet-daktari
-Projet réalisation d'un site web pour un vétérinaire.
+Projet réalisation d'un site web dynamique pour un vétérinaire.

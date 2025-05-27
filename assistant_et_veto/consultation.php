@@ -8,16 +8,16 @@ if (!isset($_SESSION['role'])) {
 }
 include("../connexion.inc.php");
 
-// Traitement du formulaire
+
 $message = '';
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
-        $query = "INSERT INTO CONSULTATION (date_et_heure, duree_en_min, anamnese, lieu, diagnostic, id_tarif, idA) 
+        $qry = "INSERT INTO CONSULTATION (date_et_heure, duree_en_min, anamnese, lieu, diagnostic, id_tarif, idA) 
                   VALUES (:date_et_heure, :duree, :anamnese, :lieu, :diagnostic, :id_tarif, :idA)";
         
-        $stmt = $cnx->prepare($query);
+        $stmt = $cnx->prepare($qry);
         $stmt->bindParam(':date_et_heure', $_POST['date_consultation']);
         $stmt->bindParam(':duree', $_POST['duree']);
         $stmt->bindParam(':anamnese', $_POST['anamnese']);
@@ -28,27 +28,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         $stmt->execute();
         
-        $id_consultation = $cnx->lastInsertId();
         $message = "Consultation enregistrée avec succès!";
         
-        // Si c'est un vétérinaire, on propose d'ajouter des prescriptions
+        // si c'est un vétérinaire, on propose d'ajouter des prescriptions
         if ($_SESSION['role'] === 'veterinaire') {
-            $message .= " <a href='prescription.php?id_consultation=".$id_consultation."'>Ajouter des prescriptions</a>";
+            // à faire
         }
     } catch (PDOException $e) {
         $error = "Erreur lors de l'enregistrement : " . $e->getMessage();
     }
 }
 
-// Récupération des données pour les listes déroulantes
+// récup des données pour les menus déroulant
 $id_animal_session = $_SESSION['id_animal'];
 
+// recuperation des infos de l'animal
 $stmt = $cnx->prepare("SELECT ida, nom, espece, race FROM Animaux WHERE ida = :id");
 $stmt->bindParam(':id', $id_animal_session);
 $stmt->execute();
 $animal = $stmt->fetch(PDO::FETCH_ASSOC);
 
-$tarifs = $cnx->query("SELECT id_tarif, type_consultation, lieu, tarif FROM TARIF WHERE date_fin IS NULL OR date_fin >= CURRENT_DATE")->fetchAll();
+// recuperation des tarifs
+$tarifs = $cnx->prepare("SELECT id_tarif, type_consultation, lieu, tarif FROM TARIF WHERE date_fin IS NULL OR date_fin >= CURRENT_DATE");
+$tarifs->execute();
+$tarifs = $tarifs->fetchAll(PDO::FETCH_ASSOC)
 ?>
 
 <!DOCTYPE html>
@@ -61,8 +64,10 @@ $tarifs = $cnx->query("SELECT id_tarif, type_consultation, lieu, tarif FROM TARI
 </head>
 <body>
     <div class="container">
+        <a href="./fiche_animal.php"><button>Retour</button></a>
         <h1>Nouvelle Consultation</h1>
         
+        <!--affichage message d'erreur ou succes-->
         <?php if ($message): ?>
             <p class="success"><?= $message ?></p>
         <?php endif; ?>
@@ -85,7 +90,7 @@ $tarifs = $cnx->query("SELECT id_tarif, type_consultation, lieu, tarif FROM TARI
             
             <div class="form-group">
                 <label for="duree">Durée (minutes):</label>
-                <input type="number" id="duree" name="duree" min="5" max="240" required>
+                <input type="number" id="duree" name="duree" min="5" required>
             </div>
             
             <div class="form-group">
